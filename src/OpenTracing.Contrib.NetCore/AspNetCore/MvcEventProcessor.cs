@@ -9,11 +9,9 @@ namespace OpenTracing.Contrib.NetCore.AspNetCore
 {
     internal sealed class MvcEventProcessor
     {
-        private const string ActionComponent = "AspNetCore.MvcAction";
         private const string ActionTagActionName = "action";
         private const string ActionTagControllerName = "controller";
 
-        private const string ResultComponent = "AspNetCore.MvcResult";
         private const string ResultTagType = "result.type";
 
         private static readonly PropertyFetcher _beforeAction_ActionDescriptorFetcher = new PropertyFetcher("actionDescriptor");
@@ -21,11 +19,13 @@ namespace OpenTracing.Contrib.NetCore.AspNetCore
 
         private readonly ITracer _tracer;
         private readonly ILogger _logger;
+        private readonly MvcOptions _options;
 
-        public MvcEventProcessor(ITracer tracer, ILogger logger)
+        public MvcEventProcessor(ITracer tracer, ILogger logger, MvcOptions options)
         {
             _tracer = tracer ?? throw new ArgumentNullException(nameof(tracer));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _options = options ?? throw new ArgumentNullException(nameof(options));;
         }
 
         public bool ProcessEvent(string eventName, object arg)
@@ -40,15 +40,15 @@ namespace OpenTracing.Contrib.NetCore.AspNetCore
                         var actionDescriptor = (ActionDescriptor)_beforeAction_ActionDescriptorFetcher.Fetch(arg);
                         var controllerActionDescriptor = actionDescriptor as ControllerActionDescriptor;
 
-                        string operationName = controllerActionDescriptor != null
-                            ? $"Action {controllerActionDescriptor.ControllerTypeInfo.FullName}/{controllerActionDescriptor.ActionName}"
-                            : $"Action {actionDescriptor.DisplayName}";
+                        string operationName = _options.ActionOperationNameResolver(actionDescriptor);
 
-                        _tracer.BuildSpan(operationName)
-                            .WithTag(Tags.Component, ActionComponent)
+                        IScope scope = _tracer.BuildSpan(operationName)
+                            .WithTag(Tags.Component, _options.ActionComponentName)
                             .WithTag(ActionTagControllerName, controllerActionDescriptor?.ControllerTypeInfo.FullName)
                             .WithTag(ActionTagActionName, controllerActionDescriptor?.ActionName)
                             .StartActive();
+
+                        _options.OnAction?.Invoke(scope.Span, actionDescriptor);
                     }
                     return true;
 
@@ -64,14 +64,16 @@ namespace OpenTracing.Contrib.NetCore.AspNetCore
                         //       we haven't yet determined which view (if any) will handle the request
 
                         object result = _beforeActionResult_ResultFetcher.Fetch(arg);
-
                         string resultType = result.GetType().Name;
-                        string operationName = $"Result {resultType}";
 
-                        _tracer.BuildSpan(operationName)
-                            .WithTag(Tags.Component, ResultComponent)
+                        string operationName = _options.ResultOperationNameResolver(result);
+
+                        IScope scope = _tracer.BuildSpan(operationName)
+                            .WithTag(Tags.Component, _options.ResultComponentName)
                             .WithTag(ResultTagType, resultType)
                             .StartActive();
+
+                        _options.OnResult?.Invoke(scope.Span, result);
                     }
                     return true;
 
