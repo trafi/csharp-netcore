@@ -34,6 +34,18 @@ namespace OpenTracing.Contrib.NetCore.Internal
             return _fetchForExpectedType.Fetch(obj);
         }
 
+        public static bool HasProperty(object obj, string propertyName)
+        {
+            if (obj == null)
+            {
+                return false;
+            }
+
+            Type objType = obj.GetType();
+            TypeInfo typeInfo = objType.GetTypeInfo();
+            PropertyInfo propertyInfo = typeInfo.GetDeclaredProperty(propertyName);
+            return propertyInfo != null;
+        }
 
         /// <summary>
         /// PropertyFetch is a helper class. It takes a PropertyInfo and then knows how

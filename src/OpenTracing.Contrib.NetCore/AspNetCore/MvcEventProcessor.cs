@@ -14,8 +14,8 @@ namespace OpenTracing.Contrib.NetCore.AspNetCore
 
         private const string ResultTagType = "result.type";
 
-        private static readonly PropertyFetcher _beforeAction_ActionDescriptorFetcher = new PropertyFetcher("actionDescriptor");
-        private static readonly PropertyFetcher _beforeActionResult_ResultFetcher = new PropertyFetcher("result");
+        private static PropertyFetcher _beforeAction_ActionDescriptorFetcher;
+        private static PropertyFetcher _beforeActionResult_ResultFetcher;
 
         private readonly ITracer _tracer;
         private readonly ILogger _logger;
@@ -25,7 +25,7 @@ namespace OpenTracing.Contrib.NetCore.AspNetCore
         {
             _tracer = tracer ?? throw new ArgumentNullException(nameof(tracer));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _options = options ?? throw new ArgumentNullException(nameof(options));;
+            _options = options ?? throw new ArgumentNullException(nameof(options));
         }
 
         public bool ProcessEvent(string eventName, object arg)
@@ -37,7 +37,7 @@ namespace OpenTracing.Contrib.NetCore.AspNetCore
                         // NOTE: This event is the start of the action pipeline. The action has been selected, the route
                         //       has been selected but no filters have run and model binding hasn't occured.
 
-                        var actionDescriptor = (ActionDescriptor)_beforeAction_ActionDescriptorFetcher.Fetch(arg);
+                        var actionDescriptor = (ActionDescriptor)GetActionDescriptorPropertyFetcher(arg).Fetch(arg);
                         var controllerActionDescriptor = actionDescriptor as ControllerActionDescriptor;
 
                         string operationName = _options.ActionOperationNameResolver(actionDescriptor);
@@ -63,7 +63,7 @@ namespace OpenTracing.Contrib.NetCore.AspNetCore
                         // NOTE: This event is the start of the result pipeline. The action has been executed, but
                         //       we haven't yet determined which view (if any) will handle the request
 
-                        object result = _beforeActionResult_ResultFetcher.Fetch(arg);
+                        object result = GetResultPropertyFetcher(arg).Fetch(arg);
                         string resultType = result.GetType().Name;
 
                         string operationName = _options.ResultOperationNameResolver(result);
@@ -83,8 +83,51 @@ namespace OpenTracing.Contrib.NetCore.AspNetCore
                     }
                     return true;
 
-                default: return false;
+                default:
+                    return false;
             }
+        }
+
+        private PropertyFetcher GetActionDescriptorPropertyFetcher(object obj)
+        {
+            if (_beforeAction_ActionDescriptorFetcher == null)
+            {
+                if (PropertyFetcher.HasProperty(obj, "actionDescriptor"))
+                {
+                    _beforeAction_ActionDescriptorFetcher = new PropertyFetcher("actionDescriptor");
+                }
+                else if (PropertyFetcher.HasProperty(obj, "ActionDescriptor"))
+                {
+                    _beforeAction_ActionDescriptorFetcher = new PropertyFetcher("ActionDescriptor");
+                }
+                else
+                {
+                    throw new ArgumentException("provided object doesn't have expected property 'ActionDescriptor'");
+                }
+            }
+
+            return _beforeAction_ActionDescriptorFetcher;
+        }
+
+        private PropertyFetcher GetResultPropertyFetcher(object obj)
+        {
+            if (_beforeActionResult_ResultFetcher == null)
+            {
+                if (PropertyFetcher.HasProperty(obj, "result"))
+                {
+                    _beforeActionResult_ResultFetcher = new PropertyFetcher("result");
+                }
+                else if (PropertyFetcher.HasProperty(obj, "Result"))
+                {
+                    _beforeActionResult_ResultFetcher = new PropertyFetcher("Result");
+                }
+                else
+                {
+                    throw new ArgumentException("provided object doesn't have expected property 'Result'");
+                }
+            }
+
+            return _beforeActionResult_ResultFetcher;
         }
     }
 }
