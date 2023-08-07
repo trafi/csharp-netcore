@@ -8,6 +8,20 @@ Instrumented components: HttpClient calls, ASP.NET Core, Entity Framework Core a
     <LangVersion>8.0</LangVersion>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <VersionPrefix>1.0.0</VersionPrefix>
+    <AssemblyVersion>1.0.0</AssemblyVersion>
+    <PackageVersion>1.0.0</PackageVersion>
+    <FileVersion>1.0.0</FileVersion>
+    <RepositoryUrl>https://github.com/trafi/csharp-netcore</RepositoryUrl>
+    <DebugType>Embedded</DebugType>
+    <EmbedAllSources>True</EmbedAllSources>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <!-- This disables compiler warnings when not all public members are documented -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="OpenTracing" Version="0.12.1" />
   </ItemGroup>
