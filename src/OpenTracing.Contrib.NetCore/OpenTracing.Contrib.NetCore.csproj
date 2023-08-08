@@ -5,6 +5,21 @@
     <Description>Adds OpenTracing instrumentation for .NET Core apps that use the `Microsoft.Extensions.*` stack.
 Instrumented components: HttpClient calls, ASP.NET Core, Entity Framework Core and any other library that uses DiagnosticSource events.</Description>
     <PackageTags>opentracing;distributed-tracing;tracing;netcore</PackageTags>
+    <LangVersion>8.0</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <VersionPrefix>1.0.0</VersionPrefix>
+    <AssemblyVersion>1.0.0</AssemblyVersion>
+    <PackageVersion>1.0.0</PackageVersion>
+    <FileVersion>1.0.0</FileVersion>
+    <RepositoryUrl>https://github.com/trafi/csharp-netcore</RepositoryUrl>
+    <DebugType>Embedded</DebugType>
+    <EmbedAllSources>True</EmbedAllSources>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <!-- This disables compiler warnings when not all public members are documented -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -51,10 +66,10 @@ Instrumented components: HttpClient calls, ASP.NET Core, Entity Framework Core a
 
   <ItemGroup Condition="$(TargetFramework)=='net5.0'">
     <!-- Main dependencies -->
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="[5.0.0,6)" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="[5.0.0,6)" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="[5.0.0,6)" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="[5.0.0,6)" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="5.0.0" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="5.0.0" />
     <!-- Instrumented libraries (which are not visible as actual dependencies) -->
     <PackageReference Include="Microsoft.Data.SqlClient" Version="2.0.1" PrivateAssets="All" />
