@@ -39,11 +39,6 @@ namespace Samples.OrdersApi
                         {
                             options.IgnorePatterns.Add(cmd => cmd.Command.CommandText == "SELECT 1");
                         });
-
-                        builder.ConfigureMicrosoftSqlClient(options =>
-                        {
-                            options.IgnorePatterns.Add(cmd => cmd.CommandText == "SELECT 1");
-                        });
                     });
                 });
         }
