@@ -7,7 +7,6 @@ using OpenTracing.Contrib.NetCore.CoreFx;
 using OpenTracing.Contrib.NetCore.EntityFrameworkCore;
 using OpenTracing.Contrib.NetCore.Internal;
 using OpenTracing.Contrib.NetCore.Logging;
-using OpenTracing.Contrib.NetCore.MicrosoftSqlClient;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -73,9 +72,6 @@ namespace Microsoft.Extensions.DependencyInjection
             builder.AddDiagnosticSubscriber<HttpHandlerDiagnostics>();
             builder.ConfigureGenericDiagnostics(options => options.IgnoredListenerNames.Add(HttpHandlerDiagnostics.DiagnosticListenerName));
 
-            builder.AddDiagnosticSubscriber<SqlClientDiagnostics>();
-            builder.ConfigureGenericDiagnostics(options => options.IgnoredListenerNames.Add(SqlClientDiagnostics.DiagnosticListenerName));
-
             return builder;
         }
 
@@ -93,49 +89,6 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         public static IOpenTracingBuilder ConfigureGenericEvents(this IOpenTracingBuilder builder, Action<GenericEventOptions> options)
-        {
-            if (builder == null)
-                throw new ArgumentNullException(nameof(builder));
-
-            if (options != null)
-            {
-                builder.Services.Configure(options);
-            }
-
-            return builder;
-        }
-
-        public static IOpenTracingBuilder ConfigureSqlClientDiagnostics(this IOpenTracingBuilder builder, Action<SqlClientDiagnosticOptions> options)
-        {
-            if (builder == null)
-                throw new ArgumentNullException(nameof(builder));
-
-            if (options != null)
-            {
-                builder.Services.Configure(options);
-            }
-
-            return builder;
-        }
-
-        /// <summary>
-        /// Adds instrumentation for Microsoft.Data.SqlClient.
-        /// </summary>
-        public static IOpenTracingBuilder AddMicrosoftSqlClient(this IOpenTracingBuilder builder)
-        {
-            if (builder == null)
-                throw new ArgumentNullException(nameof(builder));
-
-            builder.AddDiagnosticSubscriber<MicrosoftSqlClientDiagnostics>();
-            builder.ConfigureGenericDiagnostics(genericOptions => genericOptions.IgnoredListenerNames.Add(MicrosoftSqlClientDiagnostics.DiagnosticListenerName));
-
-            return builder;
-        }
-
-        /// <summary>
-        /// Configuration options for the instrumentation of Microsoft.Data.SqlClient.
-        /// </summary>
-        public static IOpenTracingBuilder ConfigureMicrosoftSqlClient(this IOpenTracingBuilder builder, Action<MicrosoftSqlClientDiagnosticOptions> options)
         {
             if (builder == null)
                 throw new ArgumentNullException(nameof(builder));
